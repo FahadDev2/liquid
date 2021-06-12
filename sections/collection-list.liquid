@@ -1,0 +1,369 @@
+<div class="container" id="vueClick">
+    <br>
+  <header role="banner" class="text-center">
+    <h1>{{ collection.title }}</h1>
+    {% if collection.description != blank %}
+      <div class="rte">
+        {{ collection.description }}
+      </div>
+    {% endif %}
+
+   
+  </header>
+
+<br>
+
+
+
+<div class="row">
+
+
+
+
+    <div class="col-lg-3">
+        <aside>
+
+            <div class="card" style="width: 18rem;">
+                <div class="card-header">
+                  Tags
+                </div>
+                {% if collection.all_tags.size > 0 %}
+                <ul class="list-group list-group-flush">
+                    {% for tag in collection.all_tags %}
+                      {% if current_tags contains tag %}
+                        <li class="list-group-item">
+                          {{ tag | link_to_remove_tag: tag }}
+                        </li>
+                      {% else %}
+                        <li class="list-group-item" >
+                          {{ tag | link_to_tag: tag }}
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+              
+<br>
+<br>
+              <div class="card" style="width: 18rem;">
+                <div class="card-header">
+                  Tags
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for c in collections %}
+                    
+                        <li class="list-group-item" >
+                         <a href="{{ c.handle}}"> {{ c.title}}</a>
+                        </li>
+                   
+                    {% endfor %}
+                  </ul>
+               
+              </div>
+              
+
+
+
+
+            
+        </aside>
+    </div>
+
+  <div class="col-lg-9">
+ 
+  <div class="row">
+
+  
+    {% for product in collection.products %}
+<div class="col-lg-4 allP">
+    <div class="cardsx">
+    <div class="image-wrapper">
+      <img src="{{ product.featured_image | img_url: '1160x' }}" alt="{{ product.featured_image.alt | escape }}" class="image" />
+    </div>
+
+    <div class="content-wrapper">
+      <div class="title">
+        <h4> <a href="{{ product.url | within: collection }}">{{ product.title }}</a></h4>
+      </div>
+      <div class="price">
+        {% if product.compare_at_price > product.price %}
+
+            {% if product.price_varies %}
+              {%- assign sale_price = product.price | money -%}
+              {{ 'products.product.on_sale_from_html' | t: price: sale_price }}
+            {% else %}
+              {{ 'products.product.on_sale' | t }}
+              {{ product.price | money }}
+            {% endif %}
+
+          {% else %}
+
+            {% if product.price_varies %}
+              {%- assign price = product.price | money -%}
+              {{ 'products.product.from_text_html' | t: price: price }}
+            {% else %}
+              {{ product.price | money }}
+            {% endif %}
+
+          {% endif %}
+
+          {% if product.compare_at_price > product.price %}
+            <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+            <s>{{ product.compare_at_price | money }}</s>
+          {% endif %}
+
+          {% unless product.available %}
+            {{ 'products.product.sold_out' | t }}
+          {% endunless %}
+      </div>
+
+      <div class="description">
+{{ product.description | strip_html | truncate: 80 }}
+      </div>
+
+      
+
+
+
+
+    </div>
+
+
+  
+
+        </div>
+        {% form 'product', product, data-product-form: '', data-product-handle: product.handle, data-enable-history-state: 'true' %}
+
+
+
+        <select v-model="form.id" id="variant_id" name="id" class="form-control">
+          {% for variant in product.variants %}
+            <option
+              {% if variant == current_variant %}selected="selected"{% endif %}
+              {% unless variant.available %}disabled="disabled"{% endunless %}
+              value="{{ variant.id }}">
+                {{ variant.title }}
+            </option>
+          {% endfor %}
+        </select>
+    
+      <label for="Quantity">{{ 'products.product.quantity' | t }}</label>
+      <input type="number" v-model="form.quantity" id="Quantity" name="quantity" value="1" min="1">
+    
+      <div data-price-wrapper>
+        <span data-product-price>
+          {{ current_variant.price | money }}
+        </span>
+    
+        {% if product.compare_at_price_max > product.price %}
+          <span class="visually-hidden" data-compare-text>{{ 'products.product.regular_price' | t }}</span>
+          <s data-compare-price>
+            {% if current_variant.compare_at_price > current_variant.price %}
+              {{ current_variant.compare_at_price | money }}
+            {% endif %}
+          </s>
+        {% endif %}
+      </div>
+    
+      <button
+        type="button"
+        @click="addToCart"
+        name="add"
+        data-submit-button
+         >
+        add
+      </button>
+    {% endform %}
+ 
+ <!-- <div class="actions">
+     
+        <select v-model="items.id" id="variant_id" name="id" class="form-control">
+          {% for variant in product.variants %}
+            <option
+              {% if variant == current_variant %}selected="selected"{% endif %}
+              {% unless variant.available %}disabled="disabled"{% endunless %}
+              value="{{ variant.id }}">
+                {{ variant.title }}
+            </option>
+          {% endfor %}
+        </select>
+    2
+      <label for="Quantity">{{ 'products.product.quantity' | t }}</label>
+      <input type="number" v-model="items.quantity" id="Quantity" name="quantity" value="1" min="1">
+            <button
+        type="button"
+        class="{{product.id}}"
+        @click="addToCarts"
+        name="add"
+        data-submit-button
+        >
+          Add Me
+        </button>
+        
+    
+    </div> -->
+
+  </div>
+</div>
+
+  {% else %}
+  {% if collection.handle == 'all' and collection.all_vendors.size == 0 and collection.all_types.size == 0 %}
+    {% for i in (1..8) %}
+      <a href="#">
+        {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+        {{ 'product-' | append: current | placeholder_svg_tag: 'placeholder-svg placeholder-svg--small' }}
+      </a>
+
+      <p>
+        <a href="#">{{ 'homepage.onboarding.product_title' | t }}</a>
+      </p>
+
+      <p>
+        {{ 1999 | money }}
+      </p>
+    {% endfor %}
+  {% else %}
+    <p>{{ 'collections.general.no_matches' | t }}</p>
+  {% endif %}
+
+{% endfor %}
+
+
+
+
+
+
+
+
+  </div>
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+</div>
+
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+
+
+
+
+
+
+
+
+
+// function addMe(q,id){
+//   console.log('ok');
+
+
+
+
+
+
+
+
+
+
+
+// q= 1;
+//   data = {
+//       "id": id,
+//       "quantity": q
+//     }
+
+// console.log(data.id);
+ 
+//     jQuery.ajax({
+
+//       type: 'POST',
+//       url: '/cart/add.js',
+//       data: data,
+//       dataType: 'json',
+//       success: function(data) { 
+        
+//         Swal.fire({
+//                     icon: 'success',
+//                     title: data.handle + ' Added to your cart',
+//                     showConfirmButton: false,
+//                     timer: 2500
+//                   })
+//       }
+//     });
+
+
+
+// }
+
+
+</script>
+
+{% schema %}
+  {
+    "name": "Collection list",
+    "max_blocks": 12,
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Collection list"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "collection",
+        "name": "Collection",
+        "settings": [
+          {
+            "label": "Collection",
+            "id": "collection",
+            "type": "collection"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Collection list",
+        "category": "Collection",
+        "blocks": [
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

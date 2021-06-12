@@ -1,0 +1,15 @@
+<script>
+    
+vw = $(window).outerWidth();
+
+
+if (vw > 768) {
+ $('.card').hover(
+function() {
+  $('.description').toggleClass('show');
+  $('.image-wrapper').toggleClass('shrink');
+}
+) 
+}
+
+</script>
